@@ -18,7 +18,7 @@ jobs:
           command: buildozer -v android debug
 
       - name: Upload APK Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: AmirX-Debug-APK
           path: bin/*.apk
