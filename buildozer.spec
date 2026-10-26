@@ -496,8 +496,8 @@ android.add_libs_out = libs/arm64-v8a/libcore.so
 
 
 # --- Android SDK & NDK Configurations ---
-android.api = 31
+android.api = 33
 android.min_api = 21
-android.sdk = 31
+android.sdk = 33
 android.ndk = 25b
 android.accept_sdk_license = True
