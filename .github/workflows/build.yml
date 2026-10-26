@@ -19,42 +19,40 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-pip git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libssl-dev openjdk-17-jdk wget
+          sudo apt-get install -y \
+            python3-pip \
+            git \
+            zip \
+            unzip \
+            openjdk-17-jdk \
+            autoconf \
+            libtool \
+            pkg-config \
+            zlib1g-dev \
+            libncurses5-dev \
+            libncursesw5-dev \
+            libssl-dev
 
-      - name: Install Buildozer
+      - name: Install p4a and Cython
         run: |
           python -m pip install --upgrade pip
-          python -m pip install --upgrade cython==0.29.36 buildozer
+          python -m pip install --upgrade cython==0.29.36
+          git clone https://github.com/kivy/python-for-android.git -b master p4a_src
+          cd p4a_src && python -m pip install -e .
 
-      - name: Force Install Build-Tools & Aidl Manually
+      - name: Build APK via p4a
         run: |
-          # ساخت دستی مسیر SDK که بیلدوزر چک می‌کند
-          SDK_BASE="$HOME/.buildozer/android/platform/android-sdk"
-          mkdir -p "$SDK_BASE/build-tools/33.0.2"
-          mkdir -p "$SDK_BASE/platforms/android-33"
-
-          echo "Downloading official Android build-tools and aidl..."
-          wget -q https://dl.google.com/android/repository/build-tools_r33.0.2-linux.zip -O build-tools.zip
-          unzip -q build-tools.zip
-          
-          # انتقال فایل‌ها به پوشه اصلی بیلدوزر
-          find . -maxdepth 2 -type d -name "android-*" | while read dir; do
-            cp -r "$dir"/* "$SDK_BASE/build-tools/33.0.2/" 2>/dev/null || true
-          done
-          
-          # بررسی وجود aidl
-          if [ -f "$SDK_BASE/build-tools/33.0.2/aidl" ]; then
-            echo "SUCCESS: Aidl is present in build-tools!"
-          else
-            echo "WARNING: Checking files..."
-            ls -la "$SDK_BASE/build-tools/33.0.2/"
-          fi
-          
-          rm -rf build-tools.zip
-
-      - name: Build APK with Buildozer
-        run: |
-          buildozer -v android debug
+          # کامپایل مستقیم بدون دردسرهای بیلدوزر
+          p4a create \
+            --bootstrap=sdl2 \
+            --requirements=python3,kivy \
+            --package=org.amirx.app \
+            --name="AmirX" \
+            --version=1.0 \
+            --sdk-dir=$HOME/.android/sdk \
+            --ndk-dir=$HOME/.android/ndk \
+            --orientation=portrait \
+            --dest-dir=./bin
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
