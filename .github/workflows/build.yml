@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install System Dependencies
+      - name: Install Buildozer System Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -33,13 +33,15 @@ jobs:
             libssl-dev \
             openjdk-17-jdk
 
-      - name: Install Buildozer and Dependencies
+      - name: Install Python Build Dependencies
         run: |
-          pip install --upgrade pip
-          pip install --upgrade cython==0.29.36 buildozer
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade cython==0.29.36 buildozer ptuples
 
-      - name: Build APK with Buildozer
+      - name: Force Fix Build-Tools and Run Buildozer
         run: |
+          # پاک کردن کش خراب قبلی
+          rm -rf ~/.buildozer/android/platform/android-sdk/build-tools/*
           buildozer -v android debug
 
       - name: Upload APK Artifact
