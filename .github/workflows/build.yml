@@ -19,18 +19,44 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-pip git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libssl-dev openjdk-17-jdk
+          sudo apt-get install -y python3-pip git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libssl-dev openjdk-17-jdk wget
 
       - name: Install Buildozer
         run: |
           python -m pip install --upgrade pip
           python -m pip install --upgrade cython==0.29.36 buildozer
 
-      - name: Build APK
+      - name: Force Install Build-Tools & Aidl Manually
+        run: |
+          # ساخت دستی مسیر SDK که بیلدوزر چک می‌کند
+          SDK_BASE="$HOME/.buildozer/android/platform/android-sdk"
+          mkdir -p "$SDK_BASE/build-tools/33.0.2"
+          mkdir -p "$SDK_BASE/platforms/android-33"
+
+          echo "Downloading official Android build-tools and aidl..."
+          wget -q https://dl.google.com/android/repository/build-tools_r33.0.2-linux.zip -O build-tools.zip
+          unzip -q build-tools.zip
+          
+          # انتقال فایل‌ها به پوشه اصلی بیلدوزر
+          find . -maxdepth 2 -type d -name "android-*" | while read dir; do
+            cp -r "$dir"/* "$SDK_BASE/build-tools/33.0.2/" 2>/dev/null || true
+          done
+          
+          # بررسی وجود aidl
+          if [ -f "$SDK_BASE/build-tools/33.0.2/aidl" ]; then
+            echo "SUCCESS: Aidl is present in build-tools!"
+          else
+            echo "WARNING: Checking files..."
+            ls -la "$SDK_BASE/build-tools/33.0.2/"
+          fi
+          
+          rm -rf build-tools.zip
+
+      - name: Build APK with Buildozer
         run: |
           buildozer -v android debug
 
-      - name: Upload APK
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: AmirX-Debug-APK
