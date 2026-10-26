@@ -494,7 +494,8 @@ warn_on_root = 1
 #   Environment variable overrides have priority over profile overrides.
 android.add_libs_out = libs/arm64-v8a/libcore.so
 
-android.min_api = 21
+
+# --- Android SDK & NDK Configurations ---
 android.api = 33
 android.min_api = 21
 android.sdk = 33
